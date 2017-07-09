@@ -1,19 +1,19 @@
 package license;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 public class LicenseClient {
  
-	public static void main(String args[]) throws IOException, InterruptedException{
+	public static void main(String args[]){
+		System.out.println("A");
 		new LicenseClient().startClient();
 	}
 	
     public void startClient(){
- 
-        InetSocketAddress hostAddress = new InetSocketAddress("localhost", 8091);
+    	System.out.println("start client called");
+        InetSocketAddress hostAddress = new InetSocketAddress("192.168.0.15", 8090);
 		try {
 			SocketChannel  channel = SocketChannel.open(hostAddress);
 			System.out.println("Client... started");
@@ -27,7 +27,8 @@ public class LicenseClient {
 	        System.arraycopy(rBuffer.array(), 0, data, 0, numRead);
 	        System.out.println("From Server: " + new String(data));
 	        channel.close();
-		} catch (IOException e) {
+		} catch (Throwable e) {
+			e.printStackTrace();
 		}
 		            
     }
