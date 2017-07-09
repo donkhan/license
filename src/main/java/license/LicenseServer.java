@@ -1,6 +1,8 @@
 package license;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -9,26 +11,21 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 public class LicenseServer {
 	private Selector selector;
-    private Map<SocketChannel,List<byte[]>> dataMapper;
-    private InetSocketAddress listenAddress;
+	private InetSocketAddress listenAddress;
+    private OutputStream logStream;
     
     public static void main(String[] args) throws Exception {
     	System.out.println("Main Function Called");
-    	
-		new LicenseServer("localhost", 8090).startServer();
+    	new LicenseServer("localhost", 8090).startServer();
     }
 
     public LicenseServer(String address, int port) throws IOException {
     	listenAddress = new InetSocketAddress(address, port);
-        dataMapper = new HashMap<SocketChannel,List<byte[]>>();
+    	logStream = new FileOutputStream(System.getProperty("user.dir") + "licenseserver.log");
     }
 
     // create server channel	
@@ -41,7 +38,7 @@ public class LicenseServer {
         serverChannel.socket().bind(listenAddress);
         serverChannel.register(this.selector, SelectionKey.OP_ACCEPT);
 
-        System.out.println("Server started...");
+        logStream.write("Server started...".getBytes());
 
         while (true) {
             // wait for events
@@ -73,10 +70,7 @@ public class LicenseServer {
         channel.configureBlocking(false);
         Socket socket = channel.socket();
         SocketAddress remoteAddr = socket.getRemoteSocketAddress();
-        System.out.println("Connected to: " + remoteAddr);
-
-        // register channel with selector for further IO
-        dataMapper.put(channel, new ArrayList<byte[]>());
+        logStream.write(("Connected to: " + remoteAddr).getBytes());
         channel.register(this.selector, SelectionKey.OP_READ);
     }
     
@@ -84,14 +78,12 @@ public class LicenseServer {
     private void read(SelectionKey key) throws IOException {
         SocketChannel channel = (SocketChannel) key.channel();
         ByteBuffer buffer = ByteBuffer.allocate(1024);
-        int numRead = -1;
-        numRead = channel.read(buffer);
+        int numRead = channel.read(buffer);
 
         if (numRead == -1) {
-            this.dataMapper.remove(channel);
             Socket socket = channel.socket();
             SocketAddress remoteAddr = socket.getRemoteSocketAddress();
-            System.out.println("Connection closed by client: " + remoteAddr);
+            logStream.write(("Connection closed by client: " + remoteAddr).getBytes());
             channel.close();
             key.cancel();
             return;
@@ -99,6 +91,9 @@ public class LicenseServer {
 
         byte[] data = new byte[numRead];
         System.arraycopy(buffer.array(), 0, data, 0, numRead);
-        System.out.println("Got: " + new String(data));
+        buffer.clear();
+        byte [] message = new String("{ product: \"MoneyBox\", company : \"MaxMoney Sdn Bhd.\", noofBranches: \"3\"}").getBytes();
+        
+        channel.write(ByteBuffer.wrap(message));
     }
 }
