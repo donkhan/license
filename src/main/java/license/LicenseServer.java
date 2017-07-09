@@ -127,7 +127,7 @@ public class LicenseServer {
     	Properties props = new Properties();
     	props.load(url.openStream());
     	JSONObject license = new JSONObject();
-    	license.put("noOfBranches",Integer.parseInt(props.getProperty("noOfBranches")));
+    	license.put("allowedNoOfBranches",Integer.parseInt(props.getProperty("noOfBranches")));
     	String licenseContent = license.toString();
     	logStream.write((licenseContent+"\n").getBytes());
     	return licenseContent;
