@@ -24,7 +24,7 @@ public class EncryptLicenseContent {
 
 	private PrivateKey getPrivate() throws Exception {
 		ClassLoader classLoader = getClass().getClassLoader();
-    	URL url = classLoader.getResource("keys\\privateKey");
+    	URL url = classLoader.getResource("keys/privateKey");
 		byte[] keyBytes = getBytes(url);
 		PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
 		KeyFactory kf = KeyFactory.getInstance("RSA");

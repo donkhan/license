@@ -61,7 +61,6 @@ public class LicenseServer {
         	}
         });
         logStream.write("Server started...\n".getBytes());
-        System.out.println("Started");
         while (true) {
             // wait for events
             this.selector.select();
@@ -97,27 +96,31 @@ public class LicenseServer {
     }
     
     //read from the socket channel
-    private void read(SelectionKey key) throws IOException {
+    private void read(SelectionKey key){
         SocketChannel channel = (SocketChannel) key.channel();
         ByteBuffer buffer = ByteBuffer.allocate(1024);
-        int numRead = channel.read(buffer);
-
-        if (numRead == -1) {
-            Socket socket = channel.socket();
-            SocketAddress remoteAddr = socket.getRemoteSocketAddress();
-            logStream.write(("Connection closed by client: " + remoteAddr + "\n").getBytes());
-            channel.close();
-            key.cancel();
-            return;
+        try{
+        	int numRead = channel.read(buffer);
+        	if (numRead == -1) {
+        		Socket socket = channel.socket();
+        		SocketAddress remoteAddr = socket.getRemoteSocketAddress();
+        		logStream.write(("Connection closed by client: " + remoteAddr + "\n").getBytes());
+        		channel.close();
+        		key.cancel();
+        		return;
+        	}
+        	byte[] data = new byte[numRead];
+            System.arraycopy(buffer.array(), 0, data, 0, numRead);
+            String clientContent = new String(data);
+            String licenseContent = process(clientContent);
+            
+            buffer.clear();
+            channel.write(ByteBuffer.wrap(licenseContent.getBytes()));
+        }catch(IOException ioe){
+        	key.cancel();
         }
 
-        byte[] data = new byte[numRead];
-        System.arraycopy(buffer.array(), 0, data, 0, numRead);
-        String clientContent = new String(data);
-        String licenseContent = process(clientContent);
         
-        buffer.clear();
-        channel.write(ByteBuffer.wrap(licenseContent.getBytes()));
     }
     
     private String process(String clientContent) throws IOException{
@@ -126,18 +129,17 @@ public class LicenseServer {
     	String productName = json.getString("product");
     	JSONObject license = new JSONObject();
     	ClassLoader classLoader = getClass().getClassLoader();
-    	URL url = classLoader.getResource(productName + "\\" + companyName + "license");
+    	URL url = classLoader.getResource(productName + "/" + companyName + "license");
     	if(url == null) {
     		logStream.write(("License for Company " + companyName + " is not found\n").getBytes());
-    		url = classLoader.getResource(productName + "\\" + "default.license");
+    		url = classLoader.getResource(productName + "/" + "default.license");
     	}
     	if(url == null){
-    		logStream.write(("We are not supporting a product called " + productName).getBytes());
+    		logStream.write(("We are not supporting a product called " + productName + "\n").getBytes());
     		return license.toString();
     	}
     	Properties props = new Properties();
     	props.load(url.openStream());
-    	
     	license.put("allowedNoOfBranches",Integer.parseInt(props.getProperty("noOfBranches")));
     	String licenseContent = license.toString();
     	logStream.write((licenseContent+"\n").getBytes());

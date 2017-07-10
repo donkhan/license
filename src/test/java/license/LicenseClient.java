@@ -16,7 +16,6 @@ public class LicenseClient {
         InetSocketAddress hostAddress = new InetSocketAddress("localhost", 8090);
 		try {
 			SocketChannel  channel = SocketChannel.open(hostAddress);
-			System.out.println("Client... started");
 	        byte [] message = new String("{  product: \"MoneyBox\", company : \"MAX MONEY SDN. BHD.\" }").getBytes();
 	        ByteBuffer buffer = ByteBuffer.wrap(message);
 	        channel.write(buffer);
