@@ -10,6 +10,7 @@ public class LicenseClient {
 		new LicenseClient().startClient();
 	}
 	
+	
     public void startClient(){
     	System.out.println("start client called");
         InetSocketAddress hostAddress = new InetSocketAddress("localhost", 8090);
@@ -24,7 +25,10 @@ public class LicenseClient {
 	        int numRead = channel.read(rBuffer);
 	        byte[] data = new byte[numRead];
 	        System.arraycopy(rBuffer.array(), 0, data, 0, numRead);
-	        System.out.println("From Server: " + new String(data));
+	        String encryptedContent = new String(data);
+	        System.out.println("From Server: " + encryptedContent);
+	        String decryptedContent = new DecryptLicenseContent().decryptText(encryptedContent);
+	        System.out.println("Decrypted As : " + decryptedContent);
 	        channel.close();
 		} catch (Throwable e) {
 			e.printStackTrace();

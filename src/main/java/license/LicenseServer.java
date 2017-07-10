@@ -13,10 +13,15 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.Properties;
 
+import javax.crypto.NoSuchPaddingException;
+
 import org.json.JSONObject;
+
+import encryption.EncryptLicenseContent;
 
 public class LicenseServer {
 	private Selector selector;
@@ -56,7 +61,7 @@ public class LicenseServer {
         	}
         });
         logStream.write("Server started...\n".getBytes());
-
+        System.out.println("Started");
         while (true) {
             // wait for events
             this.selector.select();
@@ -136,6 +141,15 @@ public class LicenseServer {
     	license.put("allowedNoOfBranches",Integer.parseInt(props.getProperty("noOfBranches")));
     	String licenseContent = license.toString();
     	logStream.write((licenseContent+"\n").getBytes());
+    	try {
+			licenseContent = new EncryptLicenseContent().encryptText(licenseContent);
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		} catch (NoSuchPaddingException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
     	return licenseContent;
     }
 }
