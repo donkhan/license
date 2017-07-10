@@ -24,7 +24,7 @@ public class DecryptLicenseContent {
 
 	private PublicKey getPublic() throws Exception {
 		ClassLoader classLoader = getClass().getClassLoader();
-    	URL url = classLoader.getResource("KeyPair\\publicKey");
+    	URL url = classLoader.getResource("keys\\LicenseServerPublicKey");
 		byte[] keyBytes = getBytes(url);
 		X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
 		KeyFactory kf = KeyFactory.getInstance("RSA");
