@@ -24,7 +24,7 @@ public class LicenseServer {
     private OutputStream logStream;
     
     public static void main(String[] args) throws Exception {
-    	new LicenseServer("192.168.0.15", 8090).startServer();
+    	new LicenseServer("localhost", 8090).startServer();
     }
 
     public LicenseServer(String address, int port) throws IOException {
@@ -118,15 +118,21 @@ public class LicenseServer {
     private String process(String clientContent) throws IOException{
     	JSONObject json = new JSONObject(clientContent);
     	String companyName = json.getString("company");
+    	String productName = json.getString("product");
+    	JSONObject license = new JSONObject();
     	ClassLoader classLoader = getClass().getClassLoader();
-    	URL url = classLoader.getResource(companyName + "license");
+    	URL url = classLoader.getResource(productName + "\\" + companyName + "license");
     	if(url == null) {
     		logStream.write(("License for Company " + companyName + " is not found\n").getBytes());
-    		url = classLoader.getResource("default.license");
+    		url = classLoader.getResource(productName + "\\" + "default.license");
+    	}
+    	if(url == null){
+    		logStream.write(("We are not supporting a product called " + productName).getBytes());
+    		return license.toString();
     	}
     	Properties props = new Properties();
     	props.load(url.openStream());
-    	JSONObject license = new JSONObject();
+    	
     	license.put("allowedNoOfBranches",Integer.parseInt(props.getProperty("noOfBranches")));
     	String licenseContent = license.toString();
     	logStream.write((licenseContent+"\n").getBytes());

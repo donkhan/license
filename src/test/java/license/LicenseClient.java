@@ -7,17 +7,16 @@ import java.nio.channels.SocketChannel;
 public class LicenseClient {
  
 	public static void main(String args[]){
-		System.out.println("A");
 		new LicenseClient().startClient();
 	}
 	
     public void startClient(){
     	System.out.println("start client called");
-        InetSocketAddress hostAddress = new InetSocketAddress("192.168.0.15", 8090);
+        InetSocketAddress hostAddress = new InetSocketAddress("localhost", 8090);
 		try {
 			SocketChannel  channel = SocketChannel.open(hostAddress);
 			System.out.println("Client... started");
-	        byte [] message = new String("{  product: \"MoneyBox\", company : \"MaxMoney Sdn Bhd.\" }").getBytes();
+	        byte [] message = new String("{  product: \"MoneyBox\", company : \"MAX MONEY SDN. BHD.\" }").getBytes();
 	        ByteBuffer buffer = ByteBuffer.wrap(message);
 	        channel.write(buffer);
 	        buffer.clear();
