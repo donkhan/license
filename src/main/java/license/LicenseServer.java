@@ -96,7 +96,7 @@ public class LicenseServer {
     private void read(SelectionKey key) throws IOException{
         SocketChannel channel = (SocketChannel) key.channel();
         ByteBuffer buffer = ByteBuffer.allocate(1024);
-        String serverData = "";
+        
         try{
         	int numRead = channel.read(buffer);
         	if (numRead == -1) {
@@ -110,15 +110,14 @@ public class LicenseServer {
         	byte[] data = new byte[numRead];
             System.arraycopy(buffer.array(), 0, data, 0, numRead);
             String clientContent = new String(data);
-            serverData = process(clientContent);
-            
+            String serverData = process(clientContent);
             buffer.clear();
             channel.write(ByteBuffer.wrap(serverData.getBytes()));
         }catch(IOException ioe){
         	key.cancel();
         }catch(JSONException ioe){
         	key.cancel();
-        	logStream.write(("Unable to Process "+ serverData +  "\n").getBytes());
+        	logStream.write(("Unable to Process request \n").getBytes());
         	channel.close();
         }
 
