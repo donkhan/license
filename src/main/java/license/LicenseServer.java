@@ -19,6 +19,7 @@ import java.util.Properties;
 
 import javax.crypto.NoSuchPaddingException;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import encryption.EncryptLicenseContent;
@@ -29,11 +30,11 @@ public class LicenseServer {
     private OutputStream logStream;
     
     public static void main(String[] args) throws Exception {
-    	new LicenseServer("localhost", 8090).startServer();
+    	new LicenseServer(8090).startServer();
     }
 
-    public LicenseServer(String address, int port) throws IOException {
-    	listenAddress = new InetSocketAddress(address, port);
+    public LicenseServer(int port) throws IOException {
+    	listenAddress = new InetSocketAddress(port);
     	File file = new File(System.getProperty("user.dir") + "\\" + "licenseserver.log");
     	if(!file.exists()){
     		file.createNewFile();
@@ -62,14 +63,10 @@ public class LicenseServer {
         });
         logStream.write("Server started...\n".getBytes());
         while (true) {
-            // wait for events
             this.selector.select();
-            //work on selected keys
             Iterator<SelectionKey> keys = this.selector.selectedKeys().iterator();
             while (keys.hasNext()) {
                 SelectionKey key = (SelectionKey) keys.next();
-                // this is necessary to prevent the same key from coming up 
-                // again the next time around.
                 keys.remove();
                 if (!key.isValid()) {
                     continue;
@@ -96,9 +93,10 @@ public class LicenseServer {
     }
     
     //read from the socket channel
-    private void read(SelectionKey key){
+    private void read(SelectionKey key) throws IOException{
         SocketChannel channel = (SocketChannel) key.channel();
         ByteBuffer buffer = ByteBuffer.allocate(1024);
+        
         try{
         	int numRead = channel.read(buffer);
         	if (numRead == -1) {
@@ -112,18 +110,21 @@ public class LicenseServer {
         	byte[] data = new byte[numRead];
             System.arraycopy(buffer.array(), 0, data, 0, numRead);
             String clientContent = new String(data);
-            String licenseContent = process(clientContent);
-            
+            String serverData = process(clientContent);
             buffer.clear();
-            channel.write(ByteBuffer.wrap(licenseContent.getBytes()));
+            channel.write(ByteBuffer.wrap(serverData.getBytes()));
         }catch(IOException ioe){
         	key.cancel();
+        }catch(JSONException ioe){
+        	key.cancel();
+        	logStream.write(("Unable to Process request \n").getBytes());
+        	channel.close();
         }
 
         
     }
     
-    private String process(String clientContent) throws IOException{
+    private String process(String clientContent) throws IOException,JSONException{
     	JSONObject json = new JSONObject(clientContent);
     	String companyName = json.getString("company");
     	String productName = json.getString("product");
