@@ -146,6 +146,7 @@ public class LicenseServer {
     	license.put("moosLicense",props.getProperty("moosLicense"));
     	String licenseContent = license.toString();
     	logStream.write((licenseContent+"\n").getBytes());
+    	/*
     	try {
 			licenseContent = new EncryptLicenseContent().encryptText(licenseContent);
 		} catch (NoSuchAlgorithmException e) {
@@ -155,6 +156,7 @@ public class LicenseServer {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		*/
     	return licenseContent;
     }
 }
