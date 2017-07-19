@@ -1,6 +1,7 @@
 package license;
 
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -26,22 +27,26 @@ public class DecryptLicenseContent {
 		ClassLoader classLoader = getClass().getClassLoader();
     	URL url = classLoader.getResource("keys/licenseServerPublicKey");
 		byte[] keyBytes = getBytes(url);
+		System.out.println("Bytes Length " + keyBytes.length);
 		X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
 		KeyFactory kf = KeyFactory.getInstance("RSA");
 		return kf.generatePublic(spec);
 	}
 
 	private byte[] getBytes(URL url) throws IOException {
-		InputStream stream = url.openStream();
+		//InputStream stream = url.openStream();
+		InputStream stream = new FileInputStream("C:\\Users\\kkhan\\Downloads\\licenseServerPublicKey");
 		int c = 0;
 		List<Byte> list = new ArrayList<Byte>();
 		while((c = stream.read()) != -1){
 			list.add((byte)c);
 		}
+		stream.close();
 		byte[] b = new byte[list.size()];
 		for(int i = 0;i<list.size();i++){
 			b[i] = list.get(i);
 		}
+		
 		return b;
 	}
 

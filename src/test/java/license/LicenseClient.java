@@ -13,7 +13,7 @@ public class LicenseClient {
 	
     public void startClient(){
     	System.out.println("start client called");
-        InetSocketAddress hostAddress = new InetSocketAddress("localhost", 8090);
+        InetSocketAddress hostAddress = new InetSocketAddress(8090);
 		try {
 			SocketChannel  channel = SocketChannel.open(hostAddress);
 	        byte [] message = new String("{  product: \"MoneyBox\", company : \"MAX MONEY SDN. BHD.\" }").getBytes();
