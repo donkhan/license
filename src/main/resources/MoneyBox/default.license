@@ -1,3 +1,4 @@
 noOfBranches=2
 expiryDate=2017/12/31
 moosLicense=true
+auditLog=false
