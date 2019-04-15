@@ -144,7 +144,7 @@ public class LicenseServer {
     	license.put("allowedNoOfBranches",Integer.parseInt(props.getProperty("noOfBranches")));
     	license.put("expiryDate", props.getProperty("expiryDate"));
     	license.put("moosLicense",props.getProperty("moosLicense"));
-    	license.put("auditLogServiceEnabled", props.getProperty("auditLog"));
+    	//license.put("auditLogServiceEnabled", props.getProperty("auditLog"));
     	String licenseContent = license.toString();
     	logStream.write((licenseContent+"\n").getBytes());
     	/*
